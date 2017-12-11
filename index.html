@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>canvasdemo</title>
+	<style>
+		html,body{
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+</head>
+<body>
+	<canvas></canvas>
+	<script>
+		//创建canvasobj对象
+	var canvasObj = function (){
+		var canvas =document.querySelector('canvas'),
+			ctx = canvas.getContext('2d'),
+			ponitcolor = '#00bdbf',
+			color = '#999';
+		canvas.width = document.body.clientWidth;
+		canvas.height = document.body.offsetHeight;
+		canvas.style.display = 'block';
+		console.log(canvas.width )
+		ctx.fillStyle = ponitcolor;
+		ctx.lineWidth = 0.3;
+		ctx.strokeStyle = color;
+		//自定义初始化的鼠标位置（自己可以随便写）
+		var mousePosition = {
+			x: 30 * canvas.width / 100,
+			y: 30 * canvas.height / 100
+		};
+		var times = null;
+		//定义points
+		var points = {
+			qty : 100,
+			distance :120,
+			radius : 12,
+			array : []
+		};
+		//定义point的位置,移动速度
+		function Point(){
+			this.x = Math.random() * canvas.width;
+			this.y = Math.random() * canvas.height;
+			this.xspeed = -0.5 + Math.random();
+			this.yspeed = -0.5 + Math.random();
+			this.radius = Math.random()*3;//点的大小
+		}
+		//设置Point prototype method
+		Point.prototype = {
+			create: function(){
+				ctx.beginPath();
+				//通过 arc() 来创建圆，请把起始角设置为 0，结束角设置为 2*Math.PI。
+				//context.arc(x,y,r,sAngle,eAngle,counterclockwise);
+				//x:圆心x坐标;y:圆心y坐标;起始角度;结束角度;False = 顺时针，true = 逆时针。
+				ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+				ctx.fill();
+			},
+			animate: function(){
+				for(i = 0; i < points.qty; i++){
+					//往数组里面添加点
+					var point = points.array[i];
+					if(point.x<0 || point.x > canvas.width){
+						point.xspeed = - point.xspeed;
+						point.yspeed = point.yspeed;
+					}
+					else if(point.y <0 ||point.y > canvas.height){
+						point.yspeed = - point.yspeed;
+						point.xspeed = point.xspeed;
+					}
+					point.x += point.xspeed;
+					point.y += point.yspeed;
+				}
+			},
+			line :function(){
+				for(i=0;i<points.qty;i++){
+					for(j =0;j<points.qty;j++){
+						i_point = points.array[i];
+						j_point = points.array[j];
+//						if((i_point.x - mousePosition.x) < points.radius && (i_point.y-mousePosition.y) < points.radius &&(i_point.x - mousePosition.x) > -points.radius && (i_point.y - mousePosition.y) > - points.radius){
+							if((i_point.x - j_point.x) <points.distance && (i_point.y- j_point.y) < points.distance && (i_point.x-j_point.x) > -points.distance && (i_point.y-j_point.y) > -points.distance){
+								ctx.beginPath();
+								ctx.moveTo(i_point.x,i_point.y);
+								ctx.lineTo(j_point.x,j_point.y);
+								ctx.stroke();
+								ctx.closePath();
+							} 
+//						}
+					}
+				}
+			}
+		}//point prototype
+		function crearPoint (){
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			for( i = 0; i<points.qty ; i++){
+				points.array.push(new Point());
+				point = points.array[i];
+				point.create();
+			}
+			point.animate();
+			point.line();
+		}
+		crearPoint();
+		clearInterval(times);
+		//每隔50毫秒刷新一次页面
+		times=setInterval(crearPoint, 30);
+	};//canvasobj
+	canvasObj();
+	</script>
+</body>
+</html>
